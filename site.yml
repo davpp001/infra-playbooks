@@ -164,3 +164,19 @@
       service:
         name: apache2
         state: reloaded
+
+    - name: Add Alias /api to production vHost
+      lineinfile:
+        path: /etc/apache2/sites-enabled/s-neue.website.conf
+        insertafter: 'DocumentRoot /var/www/s-neue.website/html'
+        line: '    Alias /api /var/www/s-neue.website/html/api'
+
+    - name: Add Directory block for API alias in production vHost
+      blockinfile:
+        path: /etc/apache2/sites-enabled/s-neue.website.conf
+        marker: "# {mark} ANSIBLE MANAGED API ALIAS"
+        block: |
+          <Directory /var/www/s-neue.website/html/api>
+              AllowOverride All
+              Require all granted
+          </Directory>
