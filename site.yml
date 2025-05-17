@@ -57,10 +57,10 @@
           DATACENTER_ID="{{ datacenter_id }}"
           VOLUME_ID="{{ volume_id }}"
           curl -s -X POST \
-            "https://api.ionos.com/cloudapi/v6/datacenters/${DATACENTER_ID}/servers/${SERVER_ID}/volumes/${VOLUME_ID}/create-snapshot" \
+            "https://api.ionos.com/cloudapi/v6/datacenters/${DATACENTER_ID}/volumes/${VOLUME_ID}/create-snapshot" \
             -H "Authorization: Bearer ${IONOS_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "{\"name\":\"snapshot-$(date +%F)\"}"
+            -d "{\"properties\":{\"name\":\"snapshot-$(date +%F)\"}}"
         owner: root
         group: root
         mode: '0755'
