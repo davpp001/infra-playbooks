@@ -93,7 +93,7 @@
           export RESTIC_PASSWORD={{ restic_password }}
           export AWS_ACCESS_KEY_ID={{ restic_access_key }}
           export AWS_SECRET_ACCESS_KEY={{ restic_secret_key }}
-      mode: '0600'
+        mode: '0600'
 
     - name: Deploy Restic backup script
       copy:
