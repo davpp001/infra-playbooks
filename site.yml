@@ -19,3 +19,24 @@
     - name: Enable UFW
       ufw:
         state: enabled
+    - name: Ensure MySQL backup directory exists
+      file:
+        path: /var/backups/mysql
+        state: directory
+        owner: root
+        group: root
+        mode: '0700'
+    - name: Schedule daily MySQL dump at 03:00
+      cron:
+        name: "daily mysql backup"
+        minute: "0"
+        hour: "3"
+        job: "mysqldump --single-transaction --routines --events --all-databases | gzip > /var/backups/mysql/backup-$(date +\\%F).sql.gz"
+        user: root
+    - name: Remove MySQL backups older than 14 days
+      cron:
+        name: "cleanup old mysql backups"
+        minute: "0"
+        hour: "4"
+        job: "find /var/backups/mysql -type f -mtime +14 -name '*.gz' -delete"
+        user: root
