@@ -4,6 +4,7 @@
   vars:
     prod_docroot: /var/www/s-neue.website/html
     api_path: "{{ prod_docroot }}/api"
+    webhook_secret: "mein-geheimes-webhook-token-123"
 
   pre_tasks:
     - name: Ensure Apache, UFW & Certbot are installed
@@ -61,9 +62,9 @@
               Require all granted
             </Directory>
 
-            Alias /api {{ api_path }}
+            Alias /api/ {{ api_path }}/
             <Directory {{ api_path }}>
-              AllowOverride All
+              AllowOverride None
               Require all granted
             </Directory>
           </VirtualHost>
@@ -75,26 +76,13 @@
         creates: /etc/apache2/sites-enabled/s-neue.website.conf
       notify: Reload Apache
 
-    - name: Ensure API directory exists and has correct ownership
+    - name: Ensure API directory exists
       file:
         path: "{{ api_path }}"
         state: directory
         owner: www-data
         group: www-data
-        mode: '0750'
-
-    - name: Remove stale API directory under old docroot
-      file:
-        path: /var/www/html/api
-        state: absent
-
-    - name: Deploy Setup-API .htaccess
-      copy:
-        src: roles/api/files/.htaccess
-        dest: "{{ api_path }}/.htaccess"
-        owner: www-data
-        group: www-data
-        mode: '0640'
+        mode: '0755'
 
     - name: Deploy Setup-API trigger script
       copy:
@@ -105,14 +93,21 @@
         mode: '0640'
       notify: Reload Apache
 
+    - name: Ensure webhook secret file exists
+      copy:
+        dest: /etc/webhook.secret
+        content: "{{ webhook_secret }}"
+        owner: root
+        group: root
+        mode: '0600'
+
     - name: Deploy API-Alias conf
       copy:
         dest: /etc/apache2/conf-available/api-alias.conf
         content: |
-          Alias /api {{ api_path }}
+          Alias /api/ {{ api_path }}/
           <Directory {{ api_path }}>
-              AllowOverride All
-              Require all granted
+            Require all granted
           </Directory>
         owner: root
         group: root
