@@ -74,8 +74,8 @@
         user: root
     - name: Download Restic
       get_url:
-      url: https://github.com/restic/restic/releases/download/v0.18.0/restic_0.18.0_linux_amd64.bz2 
-      dest: /tmp/restic.bz2
+        url: https://github.com/restic/restic/releases/download/v0.18.0/restic_0.18.0_linux_amd64.bz2 
+        dest: /tmp/restic.bz2
 
     - name: Install Restic if new
       shell: |
