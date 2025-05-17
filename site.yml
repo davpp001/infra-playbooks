@@ -1,0 +1,10 @@
+- hosts: ubuntu
+  become: true
+  tasks:
+    - name: Ensure Apache and UFW are installed
+      apt:
+        name:
+          - apache2
+          - ufw
+        state: present
+        update_cache: yes
