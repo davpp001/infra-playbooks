@@ -145,9 +145,9 @@
           set -euo pipefail
           source /etc/setup_wp.env
           exec /usr/local/bin/setup_wp "$@"
-      owner: root
-      group: root
-      mode: '0750'
+        owner: root
+        group: root
+        mode: '0750'
 
     - name: Allow www-data to run webhook wrapper via sudo
       copy:
