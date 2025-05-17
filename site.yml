@@ -72,3 +72,43 @@
         hour: "1"
         job: "/usr/local/bin/ionos-snapshot.sh"
         user: root
+    - name: Download Restic
+      get_url:
+        url: https://github.com/restic/restic/releases/download/v0.20.0/restic_0.20.0_linux_amd64.bz2
+        dest: /tmp/restic.bz2
+
+    - name: Install Restic if new
+      shell: |
+        bunzip2 /tmp/restic.bz2
+        mv /tmp/restic /usr/local/bin/restic
+        chmod +x /usr/local/bin/restic
+      args:
+        creates: /usr/local/bin/restic
+
+    - name: Write Restic env file
+      copy:
+        dest: /etc/restic.env
+        content: |
+          export RESTIC_REPOSITORY={{ restic_repo }}
+          export RESTIC_PASSWORD={{ restic_password }}
+          export AWS_ACCESS_KEY_ID={{ restic_access_key }}
+          export AWS_SECRET_ACCESS_KEY={{ restic_secret_key }}
+      mode: '0600'
+
+    - name: Deploy Restic backup script
+      copy:
+        dest: /usr/local/bin/restic-backup.sh
+        content: |
+          #!/usr/bin/env bash
+          source /etc/restic.env
+          restic backup /etc /opt/infra-playbooks /var/www
+          restic forget --keep-daily 14 --keep-weekly 4 --prune
+        mode: '0755'
+
+    - name: Schedule daily Restic backup at 02:30
+      cron:
+        name: "daily restic backup"
+        minute: "30"
+        hour: "2"
+        job: "/usr/local/bin/restic-backup.sh"
+        user: root
