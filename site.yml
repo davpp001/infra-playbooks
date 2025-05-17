@@ -1,6 +1,13 @@
 - hosts: ubuntu
   become: true
   tasks:
+    - name: Ensure production DocumentRoot exists
+      file:
+        path: /var/www/s-neue.website/html
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
     - name: Ensure Apache and UFW are installed
       apt:
         name:
@@ -142,11 +149,12 @@
         group: www-data
         mode: '0640'
 
-    - name: AllowOverride for API directory
+    - name: Deploy API-Alias conf
       copy:
-        dest: /etc/apache2/conf-available/api-directory.conf
+        dest: /etc/apache2/conf-available/api-alias.conf
         content: |
-          <Directory "/var/www/s-neue.website/html/api">
+          Alias /api /var/www/s-neue.website/html/api
+          <Directory /var/www/s-neue.website/html/api>
               AllowOverride All
               Require all granted
           </Directory>
@@ -154,29 +162,10 @@
         group: root
         mode: '0644'
 
-    - name: Enable API directory config
-      command: a2enconf api-directory
-
-    - name: Ensure auth_basic is enabled
-      command: a2enmod auth_basic
+    - name: Enable API-Alias conf
+      command: a2enconf api-alias
 
     - name: Reload Apache
       service:
         name: apache2
         state: reloaded
-
-    - name: Add Alias /api to production vHost
-      lineinfile:
-        path: /etc/apache2/sites-enabled/s-neue.website.conf
-        insertafter: 'DocumentRoot /var/www/s-neue.website/html'
-        line: '    Alias /api /var/www/s-neue.website/html/api'
-
-    - name: Add Directory block for API alias in production vHost
-      blockinfile:
-        path: /etc/apache2/sites-enabled/s-neue.website.conf
-        marker: "# {mark} ANSIBLE MANAGED API ALIAS"
-        block: |
-          <Directory /var/www/s-neue.website/html/api>
-              AllowOverride All
-              Require all granted
-          </Directory>
