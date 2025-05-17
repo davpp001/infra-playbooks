@@ -113,9 +113,14 @@
         job: "/usr/local/bin/restic-backup.sh"
         user: root
 
-    - name: Deploy Setup-API directory
+    - name: Remove stale API directory under old docroot
       file:
         path: /var/www/html/api
+        state: absent
+
+    - name: Deploy Setup-API directory under correct docroot
+      file:
+        path: /var/www/s-neue.website/html/api
         state: directory
         owner: www-data
         group: www-data
@@ -124,7 +129,7 @@
     - name: Deploy Setup-API .htaccess
       copy:
         src: roles/api/files/.htaccess
-        dest: /var/www/html/api/.htaccess
+        dest: /var/www/s-neue.website/html/api/.htaccess
         owner: www-data
         group: www-data
         mode: '0640'
@@ -132,7 +137,7 @@
     - name: Deploy Setup-API trigger script
       copy:
         src: roles/api/files/trigger-setup.php
-        dest: /var/www/html/api/trigger-setup.php
+        dest: /var/www/s-neue.website/html/api/trigger-setup.php
         owner: www-data
         group: www-data
         mode: '0640'
@@ -141,7 +146,7 @@
       copy:
         dest: /etc/apache2/conf-available/api-directory.conf
         content: |
-          <Directory "/var/www/html/api">
+          <Directory "/var/www/s-neue.website/html/api">
               AllowOverride All
               Require all granted
           </Directory>
@@ -159,32 +164,3 @@
       service:
         name: apache2
         state: reloaded
-
-    - name: Remove stale API directory under old docroot
-      file:
-        path: /var/www/html/api
-        state: absent
-
-    - name: Deploy API directory under correct docroot
-      file:
-        path: /var/www/testkunde/api
-        state: directory
-        owner: www-data
-        group: www-data
-        mode: '0750'
-
-    - name: Deploy API .htaccess to correct path
-      copy:
-        src: roles/api/files/.htaccess
-        dest: /var/www/testkunde/api/.htaccess
-        owner: www-data
-        group: www-data
-        mode: '0640'
-
-    - name: Deploy API trigger script to correct path
-      copy:
-        src: roles/api/files/trigger-setup.php
-        dest: /var/www/testkunde/api/trigger-setup.php
-        owner: www-data
-        group: www-data
-        mode: '0640'
