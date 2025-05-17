@@ -136,3 +136,26 @@
         owner: www-data
         group: www-data
         mode: '0640'
+        
+    - name: AllowOverride for API directory
+      copy:
+        dest: /etc/apache2/conf-available/api-directory.conf
+        content: |
+          <Directory "/var/www/html/api">
+              AllowOverride All
+              Require all granted
+          </Directory>
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Enable API directory config
+      command: a2enconf api-directory
+
+    - name: Ensure auth_basic is enabled
+      command: a2enmod auth_basic
+
+    - name: Reload Apache
+      service:
+        name: apache2
+        state: reloaded
