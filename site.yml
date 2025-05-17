@@ -164,6 +164,8 @@
 
     - name: Enable API-Alias conf
       command: a2enconf api-alias
+      args:
+        creates: /etc/apache2/conf-enabled/api-alias.conf
 
     - name: Reload Apache
       service:
