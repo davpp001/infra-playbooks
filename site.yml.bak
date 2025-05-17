@@ -112,27 +112,3 @@
         hour: "2"
         job: "/usr/local/bin/restic-backup.sh"
         user: root
-
-    - name: Deploy Setup-API directory
-      file:
-        path: /var/www/html/api
-        state: directory
-        owner: www-data
-        group: www-data
-        mode: '0750'
-
-    - name: Deploy Setup-API .htaccess
-      copy:
-        src: roles/api/files/.htaccess
-        dest: /var/www/html/api/.htaccess
-        owner: www-data
-        group: www-data
-        mode: '0640'
-
-    - name: Deploy Setup-API trigger script
-      copy:
-        src: roles/api/files/trigger-setup.php
-        dest: /var/www/html/api/trigger-setup.php
-        owner: www-data
-        group: www-data
-        mode: '0640'
