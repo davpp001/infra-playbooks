@@ -1,6 +1,5 @@
 all:
   hosts:
     ubuntu:
-      ansible_host: 217.160.252.118
-      ansible_user: serveradmin
-      ansible_become: true
+      ansible_connection: local
+      become: true

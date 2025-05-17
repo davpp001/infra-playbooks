@@ -40,3 +40,35 @@
         hour: "4"
         job: "find /var/backups/mysql -type f -mtime +14 -name '*.gz' -delete"
         user: root
+    - name: Ensure snapshot script directory exists
+      file:
+        path: /usr/local/bin
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Deploy IONOS snapshot script
+      copy:
+        dest: /usr/local/bin/ionos-snapshot.sh
+        content: |
+          #!/usr/bin/env bash
+          export IONOS_TOKEN="{{ ionos_token }}"
+          SERVER_ID="{{ server_id }}"
+          VOLUME_ID="{{ volume_id }}"
+          curl -s -X POST \\
+            "https://api.ionos.com/cloudapi/v5/servers/\${SERVER_ID}/volumes/\${VOLUME_ID}/create-snapshot" \\
+            -H "Authorization: Bearer \${IONOS_TOKEN}" \\
+            -H "Content-Type: application/json" \\
+            -d '{"name":"snapshot-'"$(date +%F)"'"}'
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Schedule daily IONOS snapshot at 01:00
+      cron:
+        name: "daily ionos snapshot"
+        minute: "0"
+        hour: "1"
+        job: "/usr/local/bin/ionos-snapshot.sh"
+        user: root
