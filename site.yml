@@ -136,7 +136,7 @@
         owner: www-data
         group: www-data
         mode: '0640'
-        
+
     - name: AllowOverride for API directory
       copy:
         dest: /etc/apache2/conf-available/api-directory.conf
@@ -159,3 +159,32 @@
       service:
         name: apache2
         state: reloaded
+
+    - name: Remove stale API directory under old docroot
+      file:
+        path: /var/www/html/api
+        state: absent
+
+    - name: Deploy API directory under correct docroot
+      file:
+        path: /var/www/testkunde/api
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0750'
+
+    - name: Deploy API .htaccess to correct path
+      copy:
+        src: roles/api/files/.htaccess
+        dest: /var/www/testkunde/api/.htaccess
+        owner: www-data
+        group: www-data
+        mode: '0640'
+
+    - name: Deploy API trigger script to correct path
+      copy:
+        src: roles/api/files/trigger-setup.php
+        dest: /var/www/testkunde/api/trigger-setup.php
+        owner: www-data
+        group: www-data
+        mode: '0640'
