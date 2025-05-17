@@ -8,3 +8,14 @@
           - ufw
         state: present
         update_cache: yes
+    - name: Ensure UFW allows HTTP
+      ufw:
+        rule: allow
+        port: '80'
+    - name: Ensure UFW allows HTTPS
+      ufw:
+        rule: allow
+        port: '443'
+    - name: Enable UFW
+      ufw:
+        state: enabled
