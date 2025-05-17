@@ -2,9 +2,15 @@
   become: true
 
   vars:
+    # DocumentRoot und API-Pfad
     prod_docroot: /var/www/s-neue.website/html
     api_path: "{{ prod_docroot }}/api"
+
+    # Secrets für den PHP-Webhook und Cloudflare
     webhook_secret: "mein-geheimes-webhook-token-123"
+    cf_api_token:    "lLrGrv3Q8hmj-Db4ncotnGqbaE0IFX9oKvD8yxQV"
+    zone_id:         "d7e5b4cfe310063ede065b1ba06bcdf7"
+    domain:          "s-neue.website"
 
   pre_tasks:
     - name: Ensure Apache, UFW & Certbot are installed
@@ -93,7 +99,7 @@
         mode: '0640'
       notify: Reload Apache
 
-    - name: Ensure webhook secret file exists
+    - name: Deploy webhook secret file
       copy:
         dest: /etc/webhook.secret
         content: "{{ webhook_secret }}"
@@ -119,6 +125,37 @@
       args:
         creates: /etc/apache2/conf-enabled/api-alias.conf
       notify: Reload Apache
+
+    - name: Deploy setup_wp env file for Cloudflare
+      copy:
+        dest: /etc/setup_wp.env
+        content: |
+          CF_API_TOKEN="{{ cf_api_token }}"
+          ZONE_ID="{{ zone_id }}"
+          DOMAIN="{{ domain }}"
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Deploy setup_wp webhook wrapper
+      copy:
+        dest: /usr/local/bin/setup_wp_webhook.sh
+        content: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          source /etc/setup_wp.env
+          exec /usr/local/bin/setup_wp "$@"
+      owner: root
+      group: root
+      mode: '0750'
+
+    - name: Allow www-data to run webhook wrapper via sudo
+      copy:
+        dest: /etc/sudoers.d/setup_wp_webhook
+        content: "www-data ALL=(root) NOPASSWD: /usr/local/bin/setup_wp_webhook.sh"
+        owner: root
+        group: root
+        mode: '0440'
 
     - name: Ensure MySQL backup directory exists
       file:
