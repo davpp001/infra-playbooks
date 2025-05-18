@@ -19,7 +19,7 @@ $sub = $input['subdomain'];
 
 // Hintergrund-Job starten
 $cmd = sprintf(
-    'nohup /usr/local/bin/setup_wp %s > /var/log/setup_wp.log 2>&1 &',
+    'nohup sudo /bin/bash /usr/local/bin/setup_wp_webhook.sh %s > /var/log/setup_wp.log 2>&1 &',
     escapeshellarg($sub)
 );
 exec($cmd, $out, $rc);
